@@ -6,7 +6,10 @@
 #include <algorithm>
 #include <string>
 #include <vector>
+#include "SimpleAudioEngine.h"
+#include "globals.h"
 
+using namespace CocosDenshion;
 using namespace std;
 USING_NS_CC;
 
@@ -21,11 +24,15 @@ public:
     Level * level;
     Player *player;
     Sprite *cameraTarget;
-    vector<Sprite*> enemyList;
+    Label *playerScore, *playerScoreText;
+    vector<Node*> enemyList;
+    vector<Sprite*> projectileList;
+    int tapCount;
+
 
     bool collidesX;
     bool constantTouch;
-    Point lastTouch;
+    Point lastTouch, moveTouchLocation, shootTouchLocation;
 
     Follow *camera;
 
@@ -42,14 +49,20 @@ public:
     virtual void onTouchesMoved(const vector<Touch*>& touches, Event* event);
     virtual void onTouchesEnded(const vector<Touch*>& touches, Event* event);
     virtual void onTouchesCancelled(const vector<Touch*>& touches, Event* event);
+    //void onKeyReleased(EventKeyboard::KeyCode keyCode, Event *event);
     void touch(const Point& location);
 
     void updateScene(float interval);
     void updatePlayer(float interval);
 
+    void addEnemies();
+    void spriteMoveFinished(Node* sender);
     void loadEnemies();
+    void resetTapCount(float t);
 
-    //int signum(float x); useful ??
+    void gameLogic(float dt);
+
+    //int signum(float x); useless ??
 
     static cocos2d::Scene* createScene();
 

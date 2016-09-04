@@ -1,37 +1,48 @@
 #pragma once
 
 #include "cocos2d.h"
+using namespace std;
 using namespace cocos2d;
 
 class Player : public Sprite
 {
-public:
-
-    float velocity_x;
-    float velocity_y;
-
+private:
+    float velocityX;
+    float velocityY;
     int direction;
-    int facing_left;
-    int facing_right;
-    int facing_up;
-    int facing_down;
-    int facing_down_left;
-    int facing_down_right;
-    int facing_up_left;
-    int facing_up_right;
+    //int facing_left;
+    //int facing_right;
     bool grounded;
-    bool jumping;
+    bool moving;
+    Vector<SpriteFrame*> walkFrames, idleFrames;
+    Animate *walking, *idling;
+    Size playerSize;
 
-    Animate *walk;
-    Size player_size;
-
+public:
     Rect getCollisionBox();
     Rect getUpperCollisionBox();
 
     static Player* create();
+    float getVelocityX();
+    float getVelocityY();
+    void setVelocityX(float velX);
+    void setVelocityY(float velY);
 
+
+    int getDirection();
+    bool isGrounded();
+    void setGrounded(bool);
+    bool isMoving();
+    Size getPlayerSize();
+    void move(int dir);
+    void jump();
+    void fall();
+    Sprite* shootLaser();
+    void idle();
+    void applyGravity();
     void updateState(float delta);
-    void setupAnimation(const char* name);
+    //void setupAnimation(const char* name);
+    Vector<SpriteFrame*> buildAnimation(const char *format, int count);
 
 
     Player(void);

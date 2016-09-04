@@ -44,7 +44,7 @@ vector<Rect> Level::getCollisionTilesY(Point point, int direction)
         {
             Rect tileRect = Rect();
             Point tmp = walls->positionAt(Point((int)point.x + b, mapheight - ((int)point.y + direction)));
-                        tileRect.setRect(tmp.x * SCALE_FACTOR, tmp.y * SCALE_FACTOR, map->getTileSize().width * SCALE_FACTOR, map->getTileSize().height * SCALE_FACTOR);
+            tileRect.setRect(tmp.x * SCALE_FACTOR, tmp.y * SCALE_FACTOR, map->getTileSize().width * SCALE_FACTOR, map->getTileSize().height * SCALE_FACTOR);
 
             list.push_back(tileRect);
         }
@@ -71,7 +71,35 @@ vector<Rect> Level::getCollisionTilesX(Point point, int direction)
             Rect tileRect = Rect();
 
             Point tmp = walls->positionAt(Point((int)point.x + direction, mapheight - ((int)point.y + b)));
-                        tileRect.setRect(tmp.x * SCALE_FACTOR, tmp.y * SCALE_FACTOR, map->getTileSize().width * SCALE_FACTOR, map->getTileSize().height * SCALE_FACTOR);
+            tileRect.setRect(tmp.x * SCALE_FACTOR, tmp.y * SCALE_FACTOR, map->getTileSize().width * SCALE_FACTOR, map->getTileSize().height * SCALE_FACTOR);
+
+            list.push_back(tileRect);
+        }
+
+    }
+
+    return list;
+}
+
+vector<Rect> Level::getCollisionDeathTiles(Point point, int direction)
+{
+    vector<Rect> list;
+
+    TMXLayer *walls = map->getLayer("hazards");
+
+    int mapheight = (int)map->getMapSize().height - 1;
+
+    for (int b = -1; b < 2; b++)
+    {
+
+        Sprite *tile = walls->getTileAt(Point((int)point.x + direction, mapheight - ((int)point.y + b)));
+
+        if (tile != NULL)
+        {
+            Rect tileRect = Rect();
+
+            Point tmp = walls->positionAt(Point((int)point.x + direction, mapheight - ((int)point.y + b)));
+            tileRect.setRect(tmp.x * SCALE_FACTOR, tmp.y * SCALE_FACTOR, map->getTileSize().width * SCALE_FACTOR, map->getTileSize().height * SCALE_FACTOR);
 
             list.push_back(tileRect);
         }

@@ -1,5 +1,6 @@
 #include "AppDelegate.h"
 #include "GameScene.h"
+#include "mainmenuscene.h"
 
 USING_NS_CC;
 
@@ -50,7 +51,7 @@ bool AppDelegate::applicationDidFinishLaunching()
     }
 
     // turn on display FPS
-    director->setDisplayStats(true);
+    //director->setDisplayStats(true);
 
     // set FPS. the default value is 1.0/60 if you don't call this
     director->setAnimationInterval(1.0 / 60);
@@ -76,11 +77,22 @@ bool AppDelegate::applicationDidFinishLaunching()
 
     register_all_packages();
 
-    SpriteFrameCache::getInstance()->addSpriteFramesWithFile("solbrain.plist");
-    AnimationCache::getInstance()->addAnimationsWithFile("solbrain-animations.plist");
+    //SpriteFrameCache::getInstance()->addSpriteFramesWithFile("solbrain.plist");
+    //AnimationCache::getInstance()->addAnimationsWithFile("solbrain-animations.plist");
+    SpriteFrameCache::getInstance()->addSpriteFramesWithFile("player1_anim.plist");
+    //AnimationCache::getInstance()->addAnimationsWithFile("solbrain-animations.plist");
+
+    SimpleAudioEngine::getInstance()->preloadBackgroundMusic("for nines psg.mp3");
+    SimpleAudioEngine::getInstance()->preloadBackgroundMusic("ancientbgm.mp3");
+
+    SimpleAudioEngine::getInstance()->preloadEffect("SFX_Jump_09.mp3");
+    SimpleAudioEngine::getInstance()->preloadEffect("jumpland44100.mp3");
+    SimpleAudioEngine::getInstance()->preloadEffect("Explosion_03.mp3");
+    SimpleAudioEngine::getInstance()->preloadEffect("laser8");
 
     // create a scene. it's an autorelease object
-    auto scene = GameScene::createScene();
+    auto scene = MainMenuScene::createScene();
+    //auto scene = GameScene::createScene();
 
     // run
     director->runWithScene(scene);
@@ -94,7 +106,7 @@ void AppDelegate::applicationDidEnterBackground()
     Director::getInstance()->stopAnimation();
 
     // if you use SimpleAudioEngine, it must be pause
-    // SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
+     SimpleAudioEngine::getInstance()->pauseBackgroundMusic();
 }
 
 // this function will be called when the app is active again
@@ -103,5 +115,5 @@ void AppDelegate::applicationWillEnterForeground()
     Director::getInstance()->startAnimation();
 
     // if you use SimpleAudioEngine, it must resume here
-    // SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
+     SimpleAudioEngine::getInstance()->resumeBackgroundMusic();
 }

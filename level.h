@@ -19,6 +19,7 @@ public:
     Point positionToTileCoordinate(Point point);
     vector<Rect> getCollisionTilesY(Point point, int direction);
     vector<Rect> getCollisionTilesX(Point point, int direction);
+    vector<Rect> getCollisionDeathTiles(Point point, int direction);
 
     Level(void);
     virtual ~Level(void);
