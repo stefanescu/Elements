@@ -3,11 +3,14 @@
 #include "cocos2d.h"
 #include "Level.h"
 #include "Player.h"
+#include "enemy.h"
 #include <algorithm>
 #include <string>
 #include <vector>
 #include "SimpleAudioEngine.h"
 #include "globals.h"
+#include "mainmenuscene.h"
+#include "gameoverscene.h"
 
 using namespace CocosDenshion;
 using namespace std;
@@ -23,13 +26,15 @@ public:
     //FIELDS
     Level * level;
     Player *player;
+    Sprite *ship, *powerNotification;
     Sprite *cameraTarget;
     Label *playerScore, *playerScoreText;
-    vector<Node*> enemyList;
+    vector<Enemy*> enemyList;
     vector<Sprite*> projectileList;
-    int tapCount;
+    int tapCount, shotCount;
+    float shotInterval;;
 
-
+    bool powerAvailable;
     bool collidesX;
     bool constantTouch;
     Point lastTouch, moveTouchLocation, shootTouchLocation;
@@ -56,11 +61,14 @@ public:
     void updatePlayer(float interval);
 
     void addEnemies();
-    void spriteMoveFinished(Node* sender);
-    void loadEnemies();
+    //void spriteMoveFinished(Node* sender);
+    //void loadEnemies();
     void resetTapCount(float t);
+    void resetShotCount(float t);
 
     void gameLogic(float dt);
+    void powerCheck();
+    void usePower();
 
     //int signum(float x); useless ??
 

@@ -1,6 +1,5 @@
 #include "Player.h"
-#include "globals.h"
-#include <vector>
+
 
 Player * Player::create()
 {
@@ -102,6 +101,39 @@ Sprite* Player::shootLaser()
     return projectile;
 }
 
+int Player::getKillCount()
+{
+    return killCount;
+}
+
+void Player::increaseKillCount()
+{
+    ++killCount;
+}
+
+void Player::resetKillCount()
+{
+    killCount = 0;
+}
+
+void Player::takeDmg()
+{
+    --HP;
+    if(!HP)
+        die();
+
+}
+
+int Player::getHP()
+{
+    return HP;
+}
+
+void Player::die()
+{
+
+}
+
 void Player::fall()
 {
     velocityY = -velocityY;
@@ -179,6 +211,8 @@ int Player::getDirection()
 
 Player::Player(void)
 {
+    HP = 3;
+    killCount = 0;
     velocityX = 0;
     velocityY = 0;
     direction = 0;
@@ -188,34 +222,20 @@ Player::Player(void)
     grounded = true;
     moving = false;
 
-    //walk = NULL;
     setScale(0.3f);
-    /*walkFrames.reserve(11);
-    walkFrames.pushBack(SpriteFrame::create("Base pack/Player/p1_walk/PNG/p1_walk03.png", Rect(0,0,72,97)));
-    walkFrames.pushBack(SpriteFrame::create("Base pack/Player/p1_walk/PNG/p1_walk02.png", Rect(0,0,72,97)));
-    walkFrames.pushBack(SpriteFrame::create("Base pack/Player/p1_walk/PNG/p1_walk01.png", Rect(0,0,72,97)));
-    walkFrames.pushBack(SpriteFrame::create("Base pack/Player/p1_walk/PNG/p1_walk04.png", Rect(0,0,72,97)));
-    walkFrames.pushBack(SpriteFrame::create("Base pack/Player/p1_walk/PNG/p1_walk05.png", Rect(0,0,72,97)));
-    walkFrames.pushBack(SpriteFrame::create("Base pack/Player/p1_walk/PNG/p1_walk06.png", Rect(0,0,72,97)));
-    walkFrames.pushBack(SpriteFrame::create("Base pack/Player/p1_walk/PNG/p1_walk07.png", Rect(0,0,72,97)));
-    walkFrames.pushBack(SpriteFrame::create("Base pack/Player/p1_walk/PNG/p1_walk08.png", Rect(0,0,72,97)));
-    walkFrames.pushBack(SpriteFrame::create("Base pack/Player/p1_walk/PNG/p1_walk09.png", Rect(0,0,72,97)));
-    walkFrames.pushBack(SpriteFrame::create("Base pack/Player/p1_walk/PNG/p1_walk10.png", Rect(0,0,72,97)));
-    walkFrames.pushBack(SpriteFrame::create("Base pack/Player/p1_walk/PNG/p1_walk11.png", Rect(0,0,72,97)));
-*/
 
     walkFrames = buildAnimation("p1_walk%02d.png", 11);
     auto moveAnimation = Animation::createWithSpriteFrames(walkFrames, 0.3f);
     walking = Animate::create(moveAnimation);
     walking->setTag(1);
     walking->retain();
+
     idleFrames.pushBack(SpriteFrame::create("Base pack/Player/p1_stand.png", Rect(0,0,66,92)));
     idleFrames.pushBack(SpriteFrame::create("Base pack/Player/p1_front.png", Rect(0,0,66,92)));
     auto idleAnimation = Animation::createWithSpriteFrames(idleFrames, 3.0f);
     idling = Animate::create(idleAnimation);
     idling->retain();
 
-    //setupAnimation("walk");
 }
 
 Player::~Player(void)

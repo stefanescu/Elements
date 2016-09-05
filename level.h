@@ -2,6 +2,7 @@
 
 #include "cocos2d.h"
 #include <vector>
+#include "globals.h"
 
 using namespace std;
 using namespace cocos2d;

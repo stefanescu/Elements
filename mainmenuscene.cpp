@@ -1,5 +1,5 @@
 #include "mainmenuscene.h"
-#include "GameScene.h"
+
 
 Scene* MainMenuScene::createScene()
 {
@@ -15,6 +15,7 @@ bool MainMenuScene::init()
     if (!Layer::init())
         return false;
 
+
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
@@ -28,10 +29,13 @@ bool MainMenuScene::init()
 
     SimpleAudioEngine::getInstance()->playBackgroundMusic("for nines psg.mp3", true);
 
-    titleLabel = Label::createWithTTF("START", "fonts/space age.ttf", 32);
-    startLabel = Label::createWithTTF("START", "fonts/space age.ttf", 32);
+    titleLabel = Label::createWithTTF("LONG WAY HOME", "fonts/space age.ttf", 32);
+    titleLabel->setPosition(Point(visibleSize.width/2, visibleSize.height * 0.75));
+    this->addChild(titleLabel,2);
+    startLabel = Label::createWithTTF("START", "fonts/space age.ttf", 24);
 
     auto startItem = MenuItemLabel::create(startLabel, CC_CALLBACK_1(MainMenuScene::goToGameScene, this));
+
     //auto startLabel = LabelAtlas::create("START", "fonts/arial.ttf", 16, 24, '.');
     //auto startItem = MenuItemFont::create("START", CC_CALLBACK_1(MainMenuScene::goToGameScene, this));
             //MenuItemLabel::create(startLabel, CC_CALLBACK_1(MainMenuScene::goToGameScene, this));
@@ -42,6 +46,7 @@ bool MainMenuScene::init()
     auto menu = Menu::create(startItem, NULL);
     menu->setPosition(Point::ZERO);
     this->addChild(menu);
+
 }
 
 void MainMenuScene::goToGameScene(Ref* pSender)

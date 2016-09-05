@@ -1,5 +1,5 @@
 #include "Level.h"
-#include "globals.h"
+
 
 void Level::loadMap(const char* mapname)
 {
@@ -86,6 +86,8 @@ vector<Rect> Level::getCollisionDeathTiles(Point point, int direction)
     vector<Rect> list;
 
     TMXLayer *walls = map->getLayer("hazards");
+    if (!walls)
+        return list;
 
     int mapheight = (int)map->getMapSize().height - 1;
 

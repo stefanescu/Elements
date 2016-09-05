@@ -2,6 +2,8 @@
 
 #include "cocos2d.h"
 #include "SimpleAudioEngine.h"
+#include "GameScene.h"
+#include "mainmenuscene.h"
 
 using namespace CocosDenshion;
 

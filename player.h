@@ -1,17 +1,17 @@
 #pragma once
 
 #include "cocos2d.h"
+#include "globals.h"
+#include <vector>
 using namespace std;
 using namespace cocos2d;
 
 class Player : public Sprite
-{
-private:
+{    
+protected:
     float velocityX;
     float velocityY;
-    int direction;
-    //int facing_left;
-    //int facing_right;
+    int direction, killCount, HP;
     bool grounded;
     bool moving;
     Vector<SpriteFrame*> walkFrames, idleFrames;
@@ -38,9 +38,16 @@ public:
     void jump();
     void fall();
     Sprite* shootLaser();
+    int getKillCount();
+    void increaseKillCount();
+    void resetKillCount();
+    void takeDmg();
+    int getHP();
+    void die();
     void idle();
     void applyGravity();
     void updateState(float delta);
+
     //void setupAnimation(const char* name);
     Vector<SpriteFrame*> buildAnimation(const char *format, int count);
 
