@@ -1,6 +1,5 @@
 #include "Level.h"
 
-
 void Level::loadMap(const char* mapname)
 {
     map = TMXTiledMap::create(mapname);
@@ -33,6 +32,8 @@ vector<Rect> Level::getCollisionTilesY(Point point, int direction)
     vector<Rect> list;
 
     TMXLayer *walls = map->getLayer("walls");
+    if (!walls)
+        return list;
 
     int mapheight = (int)map->getMapSize().height - 1;
 
@@ -58,6 +59,8 @@ vector<Rect> Level::getCollisionTilesX(Point point, int direction)
     vector<Rect> list;
 
     TMXLayer *walls = map->getLayer("walls");
+    if (!walls)
+        return list;
 
     int mapheight = (int)map->getMapSize().height - 1;
 

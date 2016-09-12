@@ -12,12 +12,10 @@ USING_NS_CC;
 class MainMenuScene : public cocos2d::Layer
 {
 public:
-    //static string debugTest;
     typedef Layer super;
     typedef MainMenuScene self;
 
-    Label *titleLabel, *startLabel;
-    //Button *startButton;
+    Label *titleLabel, *startLabel, *note;
 
     virtual bool init();
     static cocos2d::Scene* createScene();
@@ -28,6 +26,5 @@ public:
     MainMenuScene();
     virtual ~MainMenuScene();
 };
-//string MainMenuScene::debugTest = "LALALA";
 
 

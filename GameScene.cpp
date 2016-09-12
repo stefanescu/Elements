@@ -1,9 +1,5 @@
 #include "GameScene.h"
 
-#include <fstream>
-#include <sstream>
-
-
 Scene* GameScene::createScene()
 {
     auto scene = Scene::create();
@@ -15,19 +11,17 @@ Scene* GameScene::createScene()
 bool GameScene::init()
 {
     if ( !Layer::init() )
-    {
         return false;
-    }
 
-    //setKeyboardEnabled(true);
+
     collidesX = false;
     constantTouch = false;
     moveTouchLocation = lastTouch = shootTouchLocation = Point(0,0);
-    tapCount = 0, shotCount = 0, shotInterval = 1.0;
-    powerAvailable = false;
+    tapCount = 0, shotCount = 0, score = 0, shotInterval = 1.0;
+    powerAvailable = false, invulnerable = false;
+
 
     srand(time(NULL));
-    //MainMenuScene::debugTest = "MERGE";
 
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -46,17 +40,13 @@ bool GameScene::init()
     this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(keyListener, this);
 
     level = new Level();
-    //level->loadMap("level1.tmx");
-    //level->loadMap("map1-test2.tmx");
     level->loadMap("finalMap.tmx");
     level->retain();
 
     auto director = Director::getInstance();
     level->getMap()->setScale(SCALE_FACTOR);
 
-
-
-    //SimpleAudioEngine::getInstance()->playBackgroundMusic("ancientbgm.mp3", true);
+    SimpleAudioEngine::getInstance()->playBackgroundMusic("ancientbgm.mp3", true);
 
 
     this->addChild(level->getMap());
@@ -64,7 +54,7 @@ bool GameScene::init()
     player = Player::create();
     player->retain();
 
-    this->addEnemies();
+
 
     Point point = Point(startingX, startingY);
 
@@ -72,16 +62,16 @@ bool GameScene::init()
 
     ship = Sprite::create("shipGreen.png");
     ship->setPosition(level->tileCoordinateToPosition(shipLocation));
-    ship->setScale(0.3f);
+    ship->setScale(0.4f);
     ship->retain();
     this->addChild(ship);
 
-    Size wsize = Director::getInstance()->getVisibleSize();  //default screen size (or design resolution size, if you are using design resolution)
+    Size wsize = Director::getInstance()->getVisibleSize();
     Point *center = new Point(wsize.width/2 + origin.x, wsize.height/2 + origin.y);
 
     cameraTarget = Sprite::create();
-    cameraTarget->setPositionX(player->getPositionX()); // set to players x
-    cameraTarget->setPositionY(wsize.height/2 + origin.y + 10); // center of height
+    cameraTarget->setPositionX(player->getPositionX());
+    cameraTarget->setPositionY(wsize.height/2 + origin.y + 10);
 
     cameraTarget->retain();
 
@@ -89,67 +79,18 @@ bool GameScene::init()
 
     this->schedule(schedule_selector(GameScene::resetShotCount), shotInterval);
     this->schedule(schedule_selector(GameScene::updateScene));
-    this->schedule(schedule_selector(GameScene::gameLogic), 2.0);
+    this->schedule(schedule_selector(GameScene::gameLogic), 1.0);
 
     this->addChild(cameraTarget);
-
-    rectWithBorder = DrawNode::create();
-    Vec2 vertices[] =
-    {
-        Vec2(0, player->getPlayerSize().height),
-        Vec2(player->getPlayerSize().width, player->getPlayerSize().height),
-                Vec2(player->getPlayerSize().width, 0),
-        Vec2(0,0)
-    };
-
-    rectWithBorder->drawPolygon(vertices, 4, Color4F(0.0f,0.3f,0.3f,1), 0, Color4F(0.0f,0.2f,0.0f,1));
-
-    addChild(rectWithBorder);
-
     camera = Follow::create(cameraTarget, Rect::ZERO);
     camera->retain();
 
-    //auto labelNode = Node::create();
-    //labelNode->retain();
-     //playerScoreText = Label::createWithTTF("Points:", "fonts/space age.ttf", 32);
-     //playerScore = Label::createWithTTF("000 MERGE", "fonts/space age.ttf", 32);
-    //playerScore = Label::createWithSystemFont("TEST", "arial", 24);
-    // playerScore->setAnchorPoint(Vec2(0.5, 0.5));
-    //playerScoreText->retain();
-   // playerScore->retain();
-     //playerScore->setPosition(Point(visibleSize.width/2, visibleSize.height/2));
-     //this->addChild(playerScore, 2);
-     //this->addChild(playerScore);
-     /*
-     playerScoreText->setPosition(playerScoreText->getContentSize().width / 2,
-                                       wsize.height - playerScoreText->getContentSize().height / 2);
-
-     playerScore->setPosition(Vec2(0 + playerScoreText->getPositionX() + playerScoreText->getContentSize().width,
-                                   wsize.height - playerScoreText->getContentSize().height / 2 ));
-
-
-     this->addChild(playerScoreText);
-
-    labelNode->addChild(playerScoreText, 1);
-    labelNode->addChild(playerScore, 2);
-    playerScoreText->setPosition(10,10);
-
-
-
-
-*/
-    //labelNode->addChild(playerScore);
-
-
-
-
-
-
-
-//TODO pushScene(), popScene() for pauseMenu
-    //loadEnemies();
-
     this->runAction(camera);
+
+    //this->addEnemies();
+    //this->addEnemies();
+    //this->addEnemies();
+
     return true;
 }
 
@@ -168,111 +109,13 @@ void GameScene::addEnemies()
     enemy->move(r == 0 ? -1 : 1);
     this->addChild(enemy);
     enemyList.push_back(enemy);
-
-    /*Sprite *enemy = Sprite::create("94.png");
-
-        // Determine where to spawn the enemy along the Y axis
-        Size winSize = Director::getInstance()->getWinSize();
-        int minX = enemy->getContentSize().width/2;
-        int maxX = winSize.width -  minX;
-        int rangeX = maxX - minX;
-
-        // srand( TimGetTicks() );
-        int actualX = ( rand() % rangeX ) + minX;
-
-        // Create the enemy slightly off-screen along the right edge,
-        // and along a random position along the Y axis as calculated
-        //enemy->setPosition(ccp(winSize.height + (enemy->getContentSize().height/2), actualX) );
-        enemy->setPosition(actualX, winSize.height + enemy->getContentSize().height/2);
-        this->addChild(enemy);
-
-        // Determine speed of the enemy
-        int minDuration = (int)2.0;
-        int maxDuration = (int)4.0;
-        int rangeDuration = maxDuration - minDuration;
-        // srand( TimGetTicks() );
-        int actualDuration = ( rand() % rangeDuration )  + minDuration;
-
-        enemyList.push_back(enemy);
-        // Create the actions
-        //CCFiniteTimeAction* actionMove = CCMoveTo::create( (float)actualDuration, ccp(0 - enemy->getContentSize().height/2, actualX) );
-        auto actionMove = MoveTo::create( (float)actualDuration, Vec2(35, 10) );
-        auto actionMoveDone = CCCallFuncN::create( this,  callfuncN_selector(GameScene::spriteMoveFinished));
-
-        enemy->runAction( CCSequence::create(actionMove,  actionMoveDone, NULL) );
-*/
-
 }
-
-/*void GameScene::spriteMoveFinished(Node* sender)
-{
-  Sprite *sprite = (Sprite *)sender;
-  std::vector<Node*>::iterator position = std::find(enemyList.begin(), enemyList.end(), sprite);
-  if (position != enemyList.end())
-      enemyList.erase(position);
-  this->removeChild(sprite, true);
-}*/
-
-
-/*void GameScene::loadEnemies()
-{
-    Sprite *enemy1 = Sprite::create("94.png");
-    enemy1->setPosition(level->tileCoordinateToPosition( Point(33, 2)));
-    enemy1->setAnchorPoint(Point::ZERO);
-    enemy1->setScale(ENEMY_SCALE_FACTOR);
-    enemy1->setFlippedX(true);
-    enemy1->retain();
-
-    enemyList.push_back(enemy1);
-    this->addChild(enemy1);
-
-    Sprite *enemy2 = Sprite::create("94.png");
-    enemy2->setPosition(level->tileCoordinateToPosition( Point(44, 2)));
-    enemy2->setAnchorPoint(Point::ZERO);
-    enemy2->setScale(ENEMY_SCALE_FACTOR);
-    enemy2->setFlippedX(true);
-    enemy2->retain();
-
-    enemyList.push_back(enemy2);
-    this->addChild(enemy2);
-
-    Sprite *enemy3 = Sprite::create("94.png");
-    enemy3->setPosition(level->tileCoordinateToPosition( Point(55, 2)));
-    enemy3->setAnchorPoint(Point::ZERO);
-    enemy3->setScale(ENEMY_SCALE_FACTOR);
-    enemy3->setFlippedX(true);
-    enemy3->retain();
-
-    enemyList.push_back(enemy3);
-    this->addChild(enemy3);
-
-    Sprite *enemy4 = Sprite::create("94.png");
-    enemy4->setPosition(level->tileCoordinateToPosition( Point(100, 2)));
-    enemy4->setAnchorPoint(Point::ZERO);
-    enemy4->setScale(ENEMY_SCALE_FACTOR);
-    enemy4->setFlippedX(true);
-    enemy4->retain();
-
-    enemyList.push_back(enemy4);
-    this->addChild(enemy4);
-
-    Sprite *enemy5 = Sprite::create("94.png");
-    enemy5->setPosition(level->tileCoordinateToPosition( Point(100, 6)));
-    enemy5->setAnchorPoint(Point::ZERO);
-    enemy5->setScale(ENEMY_SCALE_FACTOR);
-    enemy5->setFlippedX(true);
-    enemy5->retain();
-
-    enemyList.push_back(enemy5);
-    this->addChild(enemy5);
-}
-*/
 
 void GameScene::powerCheck()
 {
     if (player->getKillCount() == 10)
     {
-        powerNotification = Sprite::create("explamation_1.png");
+        powerNotification = Sprite::create("exclamation_1.png");
         powerNotification->setPosition(level->tileCoordinateToPosition(Point(24,5)));
         this->addChild(powerNotification);
         powerAvailable = true;
@@ -284,17 +127,41 @@ void GameScene::usePower()
 {
     powerAvailable = false;
     powerNotification->removeFromParent();
+    auto shipProjectile1 = Sprite::create("shipProjectile.png");
+    shipProjectile1->retain();
+    shipProjectile1->setPosition(level->tileCoordinateToPosition(Point(shipLocation.x - 2, shipLocation.y)));
+    shipProjectile1->setScale(0.4f);
+    shipProjectile1->setFlippedX(true);
+
+    auto shipProjectile2 = Sprite::create("shipProjectile.png");
+    shipProjectile2->retain();
+    shipProjectile2->setPosition(level->tileCoordinateToPosition(Point(shipLocation.x + 2, shipLocation.y)));
+    shipProjectile2->setScale(0.4f);
+    shipProjectile2->setFlippedX(false);
+
+    SimpleAudioEngine::getInstance()->playEffect("laser8.wav");
+    auto travel1 = MoveBy::create(2, Vec2(-700, 0));
+    auto travel2 = MoveBy::create(2, Vec2(700, 0));
+
+    projectileList.push_back(shipProjectile1);
+    projectileList.push_back(shipProjectile2);
+
+    shipProjectile1->runAction(travel1);
+    shipProjectile2->runAction(travel2);
+    this->addChild(shipProjectile1,3);
+    this->addChild(shipProjectile2,3);
+    if (shotInterval >=0.2f)
+        shotInterval-= 0.2f;
+    //Enemy::maxHP++;
+
 }
 
 void GameScene::updateScene(float delta)
 {
-    //player->updateState(0.1f);
-
-
-    //player->velocity_y-= GRAVITY;
     auto winSize = Director::getInstance()->getWinSize();
     auto dirX =1, dirY = 1;
     auto enemyDirX = 1, enemyDirY = -1;
+
     if (moveTouchLocation != Point(0,0))
     {
     if (moveTouchLocation.y < (winSize.height * 0.5f))
@@ -309,11 +176,8 @@ void GameScene::updateScene(float delta)
     {
         if(player->isGrounded() && player->getVelocityY() <= 0)
         {
-            //player->velocity_y = PLAYER_JUMP_VELOCITY;
-            //player->grounded = false;
             player->jump();
-            SimpleAudioEngine::getInstance()->playEffect("Explosion_03", false, 1.0, 1.0, 1.0);
-
+            SimpleAudioEngine::getInstance()->playEffect("SFX_Jump_09.mp3", false, 1.0, 1.0, 1.0);
         }
     }
     }
@@ -321,36 +185,34 @@ void GameScene::updateScene(float delta)
 
     if (shootTouchLocation != Point(0,0) && shotCount < 2)
     {
-        auto projectile = player->shootLaser();
+       // auto projectile = player->shootLaser();
+        auto projectile = Sprite::create("laserprojectile.png");
         projectileList.push_back(projectile);
         projectile->setPosition(player->getPositionX() + player->getDirection(), player->getPositionY()+ 22);
         projectile->setScale(0.2f);
         auto travel = MoveBy::create(2, Vec2(700 * player->getDirection(),0));
-        /*auto action  = Sequence::create(
-                MoveBy::create(2, Vec2(700 * player->getDirection(),0)),
-                CallFuncN::create( CC_CALLBACK_1(GameScene::doRemoveFromParentAndCleanup, this, true)),
-                NULL);*/
-
-        ++shotCount;
         this->addChild(projectile);
-        SimpleAudioEngine::getInstance()->playEffect("laser8.wav");
+        //SimpleAudioEngine::getInstance()->playEffect("laser8.wav");
+        SimpleAudioEngine::getInstance()->playEffect("laser2.mp3");
         projectile->runAction(travel);
+        ++shotCount;
     }
+
     player->applyGravity();
 
     for(Enemy* enemy : enemyList)
         enemy->applyGravity();
-    Rect player_rect = player->getBoundingBox();
 
-    Point tmp;
+    Rect player_rect;
+
+
     std::vector<Rect> tiles;
     std::vector<Rect> deathTiles;
 
     tiles.clear();
     deathTiles.clear();
 
-    // center of player's sprite
-    tmp = level->positionToTileCoordinate(Point(player->getPositionX() + player->getPlayerSize().width * 0.5f ,
+    Point tmp = level->positionToTileCoordinate(Point(player->getPositionX() + player->getPlayerSize().width * 0.5f ,
             player->getPositionY() + player->getPlayerSize().height * 0.5f));
 
 
@@ -359,7 +221,7 @@ void GameScene::updateScene(float delta)
 
     player_rect.setRect(
                     player->getBoundingBox().getMinX() + player->getVelocityX(),
-                    player->getBoundingBox().getMinY() + 1.0f, // dont let the rectangle touch the ground otherwise, will count as collision
+                    player->getBoundingBox().getMinY() + 1.0f,
                     player->getPlayerSize().width,
                     player->getPlayerSize().height
     );
@@ -373,14 +235,14 @@ void GameScene::updateScene(float delta)
         }
 
     }
+    tiles.clear();
     Rect enemy_rect;
     for (Enemy *enemy : enemyList)
     {
         auto enemyCent = level->positionToTileCoordinate(Point(enemy->getPositionX() + enemy->getPlayerSize().width * 0.5f ,
                                                                enemy->getPositionY() + enemy->getPlayerSize().height * 0.5f));
-        enemy_rect = enemy->getBoundingBox();
         enemy_rect.setRect (
-                    enemy->getBoundingBox().getMinX() + enemy->getVelocityX(),
+                    enemy->getBoundingBox().getMinX() + enemy->getVelocityX(),// + 1.0f,
                     enemy->getBoundingBox().getMinY() + 1.0f,
                     enemy->getPlayerSize().width,
                     enemy->getPlayerSize().height
@@ -389,11 +251,14 @@ void GameScene::updateScene(float delta)
         for (Rect tile : tiles)
         {
             if (enemy_rect.intersectsRect(tile))
+            {
                 enemy->reverseDirection();
+                break;
+            }
         }
     }
 
-    /*for (Sprite* projectile : projectileList)
+    for (Sprite* projectile : projectileList)
     {
         auto projectilePos = projectile->getPosition();//player->convertToWorldSpace(projectile->getPosition());
         auto projectileRect = Rect (projectilePos.x, projectilePos.y,
@@ -408,7 +273,8 @@ void GameScene::updateScene(float delta)
 
             }
 
-    }*/
+    }
+
     for (Sprite* projectile : projectileList)
     {
         auto projectilePos = projectile->getPosition();//player->convertToWorldSpace(projectile->getPosition());
@@ -416,28 +282,43 @@ void GameScene::updateScene(float delta)
                                     projectile->getContentSize().width, projectile->getContentSize().height);
         for (Enemy* enemy : enemyList)
         {
-            enemy_rect = enemy->getBoundingBox();
             enemy_rect.setRect (
-                        enemy->getBoundingBox().getMinX() + enemy->getVelocityX(),
+                        enemy->getBoundingBox().getMinX(),
                         enemy->getBoundingBox().getMinY() + 1.0f,
                         enemy->getPlayerSize().width,
                         enemy->getPlayerSize().height
                         );
             if (projectileRect.intersectsRect(enemy_rect))
             {
-                player->increaseKillCount();
-                auto aux = projectile;
+                //auto aux = projectile;
+                projectile->setVisible(false);
+                projectile->removeFromParent();
+                projectile->release();
                 projectileList.erase(remove(projectileList.begin(), projectileList.end(), projectile), projectileList.end());
-                aux->removeFromParent();
-                aux->release();
+                //aux->setVisible(false);
+                //aux->removeFromParent();
+                //aux->release();
 
                 enemy->takeDmg();
                 if(!enemy->getHP())
                 {
-                    aux = enemy;
-                    enemyList.erase(remove(enemyList.begin(), enemyList.end(), enemy),enemyList.end());
-                    aux->removeFromParent();
-                    aux->release();
+                    player->increaseKillCount();
+                    ++score;
+                    auto aux2 = enemy;
+
+                    auto rotateAction = RotateBy::create (1.0f, 40.0f);
+                    auto fadeAction = FadeOut::create (1.0f);
+                    auto spawn = Spawn::createWithTwoActions(rotateAction, fadeAction);
+                    auto deleteEnemy = CallFunc::create([aux2](){
+                        aux2->removeFromParent();
+                        aux2->release();
+                    });
+
+                    auto sequence = Sequence::create(spawn, deleteEnemy, nullptr);
+                    enemy->runAction(sequence);
+                    //enemy->runAction(spawn);
+
+                    enemyList.erase(remove(enemyList.begin(), enemyList.end(), enemy),enemyList.end()); //  ???
 
                 }
             }
@@ -461,15 +342,12 @@ void GameScene::updateScene(float delta)
         if (tile.intersectsRect(player_rect))
         {
             if (player->getVelocityY() > 0)
-            {
                 player->setPositionY( player->getPositionY() - player->getVelocityY());
-                //player->fall();
-            }
+
             else
             {
                 player->setPositionY(tile.getMaxY());
 
-                // if we hit the ground, mark us as grounded so we can jump
                 if (!player->isGrounded())
                     SimpleAudioEngine::getInstance()->playEffect("jumpland44100.mp3", false, 1.0, 1.0, 1.0);
 
@@ -479,8 +357,8 @@ void GameScene::updateScene(float delta)
             player->setVelocityY(0);
             break;
         }
-            //player->setGrounded(false);
     }
+    tiles.clear();
 
     for (Enemy* enemy : enemyList)
     {
@@ -501,15 +379,16 @@ void GameScene::updateScene(float delta)
 
                 enemy->setGrounded(true);
                 enemy->setVelocityY(0);
+                break;
             }
 
 
         }
+        enemy->setGrounded(false);
     }
 
-      /*deathTiles.clear();
+      deathTiles.clear();
       deathTiles = level->getCollisionDeathTiles(tmp, dirX);
-      // check for hazard collisions
         for (Rect tile : deathTiles)
         {
             if (tile.intersectsRect(player_rect) ) //death
@@ -518,17 +397,17 @@ void GameScene::updateScene(float delta)
                 Point p = level->tileCoordinateToPosition( Point(startingX, startingY));
                 player->setPosition(p);
             }
-        }*/
+        }
 
 
 
 
-    // check for enemy collisions
-    for (Node *tile : enemyList)
+    for (Enemy *enemy : enemyList)
     {
-        if (tile->getBoundingBox().intersectsRect(player_rect) )
+        if (enemy->getBoundingBox().intersectsRect(player_rect) &&  (!invulnerable))
         {
             player->takeDmg();
+            activateInvulnerability();
             if (player->getHP())
             {
                 Point p = level->tileCoordinateToPosition( Point(startingX, startingY));
@@ -536,6 +415,10 @@ void GameScene::updateScene(float delta)
             }
             else
             {
+             UserDefault::getInstance()->setIntegerForKey("last_score", score);
+             if (score > UserDefault::getInstance()->getIntegerForKey("high_score"))
+                 UserDefault::getInstance()->setIntegerForKey("high_score", score);
+
              SimpleAudioEngine::getInstance()->stopBackgroundMusic();
              auto gameScene = GameOverScene::createScene();
              Director::getInstance()->replaceScene(TransitionSlideInT::create(TRANSITION_TIME, gameScene));
@@ -547,16 +430,25 @@ void GameScene::updateScene(float delta)
 
     powerCheck();
     player->updateState(delta);
+
     for (Enemy* enemy : enemyList)
         enemy->updateState(delta);
-\
+
     player->setVelocityX(0);
     cameraTarget->setPositionX (player->getPositionX());
-
-    //cameraTarget->setPositionY (player->getPositionY() + 100);
-    cameraTarget->setPositionY (player->getPositionY() + (player->getPositionY() < 5 ? 0 : 100));
+    //cameraTarget->setPositionY (player->getPositionY() + (player->getPositionY() < 5 ? 0 : 20)); // ???
+    if (player->getPositionY() <= 10)
+        cameraTarget->setPositionY(0);
+    else
+        cameraTarget->setPositionY(player->getPositionY());
     moveTouchLocation = Point(0,0);
-    //this->updatePlayer(delta);
+}
+
+void GameScene::activateInvulnerability()
+{
+    invulnerable = true;
+    this->schedule(schedule_selector(GameScene::disableInvulnerability), 2.0f);
+    player->setOpacity(200.0f);
 }
 
 void GameScene::updatePlayer(float delta)
@@ -609,7 +501,6 @@ void GameScene::updatePlayer(float delta)
         if (player_rect.intersectsRect(tile))
         {
             //player->velocity_x = 0;
-            //player->idle();
             break;
         }
     }
@@ -653,7 +544,6 @@ void GameScene::updatePlayer(float delta)
 
       deathTiles.clear();
       deathTiles = level->getCollisionDeathTiles(tmp, dirX);
-      // check for hazard collisions
         for (Rect tile : deathTiles)
         {
             if (tile.intersectsRect(player_rect) ) //death
@@ -665,7 +555,6 @@ void GameScene::updatePlayer(float delta)
         }
 
 
-    // check for enemy collisions
     for (Node *tile : enemyList)
     {
         if (tile->getBoundingBox().intersectsRect(player_rect) )
@@ -686,8 +575,6 @@ void GameScene::onKeyPressed(EventKeyboard::KeyCode keyCode, Event* event)
 {
     if(std::find(heldKeys.begin(), heldKeys.end(), keyCode) == heldKeys.end())
             heldKeys.push_back(keyCode);
-
-
 }
 
 void GameScene::onKeyReleased(EventKeyboard::KeyCode keyCode, Event* event)
@@ -697,16 +584,6 @@ void GameScene::onKeyReleased(EventKeyboard::KeyCode keyCode, Event* event)
        Director::getInstance()->end();
 }
 
-/*int GameScene::signum(float x)
-{
-  if (x > 0.0L)
-    return 1.0L;
-  else if (x < 0.0L)
-    return -1.0L;
-  else
-    return 0.0L;
-}*/
-
 void GameScene::menuCloseCallback(Ref* pSender)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8) || (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
@@ -714,7 +591,6 @@ void GameScene::menuCloseCallback(Ref* pSender)
 #endif
 
     Director::getInstance()->end();
-    //Director::getInstance()->pushScene(MainMenuScene::createScene());
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
     exit(0);
@@ -729,15 +605,6 @@ inline Point locationInGLFromTouch(Touch& touch)
 
 void GameScene::onTouchesBegan(const vector<Touch*>& touches, Event* event)
 {
-    //constantTouch = true;
-    //while(constantTouch)
-        //for (auto& touch : touches)
-            //this->touch(locationInGLFromTouch(*touch));
-    //for (auto& touch : touches)
-        //lastTouch = locationInGLFromTouch(*touch);
-    //for (auto& touch : touches)
-        //this->touch(locationInGLFromTouch(*touch));
-
     for (auto& touch : touches)
         this->touch(locationInGLFromTouch(*touch));
 }
@@ -753,42 +620,37 @@ void GameScene::onTouchesCancelled(const vector<Touch *> &touches, Event *event)
 
 }
 
-/*void GameScene::onKeyReleased(EventKeyboard::KeyCode keyCode, Event *event) {
-
-    if(keyCode == EventKeyboard::KeyCode::KEY_ESCAPE)
-       Director::getInstance()->end();
-
-}*/
-
-
 void GameScene::onTouchesEnded(const vector<Touch*>& touches, Event* event)
 {
-    //constantTouch = false;
 
 }
 
 void GameScene::touch(const Point& location)
 {
-    if ((location.y <= Director::getInstance()->getVisibleSize().height/4)
-        || (location.y > Director::getInstance()->getVisibleSize().height/2))
+    if ((location.y >= Director::getInstance()->getVisibleSize().height *0.9) && powerAvailable)
+        //&& (location.x == Director::getInstance()->getVisibleSize().width / 2))
+
+        usePower();
+    else if ((location.y <= Director::getInstance()->getVisibleSize().height/4)
+        || (location.y > Director::getInstance()->getVisibleSize().height/2) &&(location.y < Director::getInstance()->getVisibleSize().height * 0.9))
         this->moveTouchLocation = location;
+
     else if((location.y > Director::getInstance()->getVisibleSize().height/4)
             && (location.y <= Director::getInstance()->getVisibleSize().height/2))
     {
         ++tapCount;
-        //lastTouch = location;
 
         if(tapCount == 1)
             this->schedule(schedule_selector(GameScene::resetTapCount), 0.25);
+
         else
         {
             this->unschedule(schedule_selector(GameScene::resetTapCount));
             shootTouchLocation = location;
         }
     }
-    else if ((location.y < Director::getInstance()->getVisibleSize().height /2)
-        && (location.x == Director::getInstance()->getVisibleSize().width / 2))
-        usePower();
+
+
 }
 
 void GameScene::resetTapCount(float t)
@@ -799,6 +661,12 @@ void GameScene::resetTapCount(float t)
 void GameScene::resetShotCount(float t)
 {
     shotCount = 0;
+}
+
+void GameScene::disableInvulnerability(float t)
+{
+    invulnerable = false;
+    player->setOpacity(300.0f);
 }
 
 GameScene::GameScene(void)

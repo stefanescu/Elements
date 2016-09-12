@@ -30,15 +30,15 @@ bool GameOverScene::init()
     dispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 
     SimpleAudioEngine::getInstance()->setBackgroundMusicVolume(2.0f);
-
     SimpleAudioEngine::getInstance()->playBackgroundMusic("for nines psg.mp3", true);
 
     scoreTextLabel = Label::createWithTTF("score:", "fonts/space age.ttf", 32);
     scoreTextLabel->setPosition(Point(visibleSize.width * 0.3, visibleSize.height * 0.75));
-    this->addChild(scoreLabel,2);
-    scoreLabel = Label::createWithTTF("1k", "fonts/space age.ttf", 32);
-    scoreLabel->setPosition(Point(visibleSize.width * 0.3 + scoreTextLabel->getWidth(), visibleSize.height * 0.75));
-    this->addChild(scoreLabel,2);
+    //this->addChild(scoreTextLabel,2);
+
+    scoreLabel = Label::createWithTTF("12", "fonts/space age.ttf", 26);
+    scoreLabel->setPosition(Point(visibleSize.width * 0.3 + scoreTextLabel->getContentSize().width, visibleSize.height * 0.75));
+    //this->addChild(scoreLabel,2);
 
     playAgainLabel = Label::createWithTTF("play again", "fonts/space age.ttf", 24);
     mainMenuLabel = Label::createWithTTF("main menu", "fonts/space age.ttf", 24);
@@ -53,10 +53,10 @@ bool GameOverScene::init()
     menuItem2->setColor(Color3B(200,200,255));
     menuItem2->setDisabledColor( Color3B(32,32,64));
 
+
     auto menu = Menu::create(menuItem1, menuItem2, NULL);
     menu->setPosition(Point::ZERO);
     this->addChild(menu);
-
 }
 
 void GameOverScene::goToGameScene (Ref* pSender)
@@ -68,7 +68,6 @@ void GameOverScene::goToGameScene (Ref* pSender)
 
 void GameOverScene::goToMainMenuScene (Ref* pSender)
 {
-    SimpleAudioEngine::getInstance()->stopBackgroundMusic();
     auto mainMenuScene = MainMenuScene::createScene();
     Director::getInstance()->replaceScene(TransitionSlideInT::create(TRANSITION_TIME, mainMenuScene));
 }

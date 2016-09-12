@@ -4,7 +4,7 @@ Enemy * Enemy::create()
 {
     Enemy* eSprite = new Enemy();
 
-    if (eSprite->initWithSpriteFrameName("p1_stand.png"))
+    if (eSprite->initWithFile("slimeGreen.png"))
     {
         eSprite->setAnchorPoint(Point::ZERO);
         eSprite->playerSize = Size(eSprite->getBoundingBox().size.width, eSprite->getBoundingBox().size.height);
@@ -46,8 +46,23 @@ void Enemy::reverseDirection()
 void Enemy::move (int dir)
 {
     direction = dir;
-    velocityX = dir > 0 ? ENEMY_MAX_VELOCITY : -ENEMY_MAX_VELOCITY;
+    velocityX = dir > 0 ? ENEMY_MAX_VELOCITY : ENEMY_MAX_VELOCITY * -1;
     moving = true;
+}
+
+void Enemy::updateState (float delta)
+{
+    if (direction == 1)
+        setFlippedX(true);
+    else
+        setFlippedX(false);
+
+    if (velocityX != 0)
+        setPositionX(getPositionX() + velocityX);
+
+    if (velocityY != 0 && !grounded)
+        setPositionY(getPositionY() + velocityY);
+
 }
 
 Enemy::Enemy()
@@ -59,14 +74,9 @@ Enemy::Enemy()
     direction = 0;
     grounded = true;
     moving = false;
-
-    grounded = true;
-    moving = false;
-    setScale(0.3f);
-
+    setScale(0.7f);
 }
 
 Enemy::~Enemy()
 {
-
 }

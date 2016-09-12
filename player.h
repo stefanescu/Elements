@@ -3,6 +3,7 @@
 #include "cocos2d.h"
 #include "globals.h"
 #include <vector>
+
 using namespace std;
 using namespace cocos2d;
 
@@ -28,7 +29,6 @@ public:
     void setVelocityX(float velX);
     void setVelocityY(float velY);
 
-
     int getDirection();
     bool isGrounded();
     void setGrounded(bool);
@@ -48,9 +48,7 @@ public:
     void applyGravity();
     void updateState(float delta);
 
-    //void setupAnimation(const char* name);
     Vector<SpriteFrame*> buildAnimation(const char *format, int count);
-
 
     Player(void);
     virtual ~Player(void);

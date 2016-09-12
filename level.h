@@ -9,10 +9,10 @@ using namespace cocos2d;
 
 class Level : public Object
 {
-public:
-
+private:
     TMXTiledMap *map;
 
+public:
     void loadMap(const char* name);
     TMXTiledMap * getMap();
 

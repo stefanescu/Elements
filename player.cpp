@@ -5,7 +5,6 @@ Player * Player::create()
 {
     Player* pSprite = new Player();
 
-    //if(pSprite->initWithSpriteFrameName("idle"))
     if (pSprite->initWithSpriteFrameName("p1_stand.png"))
     {
         pSprite->setAnchorPoint(Point::ZERO);
@@ -21,7 +20,7 @@ Rect Player::getCollisionBox()
 
     Rect rect = Rect(
                 bbox.getMinX() + velocityX,
-                bbox.getMinY() ,//+ 1.0f,
+                bbox.getMinY() ,
                 bbox.size.width,
                 bbox.size.height);
     return rect;
@@ -71,7 +70,6 @@ void Player::setVelocityY (float velY)
 
 void Player::move (int dir)
 {
-    //this->stopAllActions();
     if (grounded)
         this->runAction(RepeatForever::create(walking));
 
@@ -96,8 +94,6 @@ Sprite* Player::shootLaser()
 {
     auto projectile = Sprite::create("laserprojectile.png");
     projectile->retain();
-    //auto travel = MoveBy::create(5, Vec2(50 * direction,0));
-    //projectile->runAction(travel);
     return projectile;
 }
 
@@ -145,7 +141,6 @@ void Player::idle ()
     this->runAction(RepeatForever::create(idling));
 
     velocityX = 0;
-    //velocityY = 0;
     moving = false;
 }
 
@@ -161,7 +156,8 @@ Size Player::getPlayerSize()
 
 void Player::applyGravity()
 {
-    velocityY -= GRAVITY;
+    if (velocityY > MAX_FALL_VELOCITY)
+        velocityY -= GRAVITY;
 }
 
 void Player::updateState (float delta)
@@ -172,24 +168,12 @@ void Player::updateState (float delta)
         setFlippedX(true);
 
     if (velocityX != 0)
-    {
         setPositionX(getPositionX() + velocityX);
-        //velocityX = 0;
-    }
-    if (velocityY != 0)
-    {
-        setPositionY(getPositionY() + velocityY);
-        //applyGravity();
-    }
-}
 
-/*void Player::setupAnimation(const char* name)
-{
-    walk = Animate::create( AnimationCache::getInstance()->getAnimation(name));
-    walk->startWithTarget(this);
-    walk->setDuration(0.80f);
-    walk->retain();
-}*/
+    if (velocityY != 0)
+        setPositionY(getPositionY() + velocityY);
+
+}
 
 Vector<SpriteFrame*> Player::buildAnimation(const char *format, int count)
 {
@@ -216,9 +200,6 @@ Player::Player(void)
     velocityX = 0;
     velocityY = 0;
     direction = 0;
-    grounded = true;
-    moving = false;
-
     grounded = true;
     moving = false;
 
