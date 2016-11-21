@@ -1,3 +1,2 @@
-# Help is coming
-# WIP
+# Help is coming (WIP)
 Multiplatform game.
