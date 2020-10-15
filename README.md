@@ -1,2 +1,3 @@
-# Help is coming (WIP)
-Multiplatform game.
+# Help is coming game
+
+C++ Cocos2dx multiplatform game.
